@@ -124,6 +124,10 @@
                   <name>app</name>
                   <value>catalog</value>
                 </property>
+                <property>
+                  <name>version</name>
+                  <value>v1</value>
+                </property>
               </all>
             </labels>
             <annotations>
