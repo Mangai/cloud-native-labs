@@ -43,31 +43,18 @@ public class GatewayVerticle extends AbstractVerticle {
         router.get("/health").handler(ctx -> ctx.response().end(new JsonObject().put("status", "UP").toString()));
         router.get("/api/products").handler(this::products);
 
-        ServiceDiscovery.create(vertx, discovery -> {
-            // Catalog lookup
-            Single<WebClient> catalogDiscoveryRequest = HttpEndpoint.rxGetWebClient(discovery,
-                    rec -> rec.getName().equals("catalog"))
-                    .onErrorReturn(t -> WebClient.create(vertx, new WebClientOptions()
+        catalog = WebClient.create(vertx, new WebClientOptions()
                             .setDefaultHost(System.getProperty("catalog.api.host", "localhost"))
-                            .setDefaultPort(Integer.getInteger("catalog.api.port", 9000))));
+                            .setDefaultPort(Integer.getInteger("catalog.api.port", 9000))
+                            );
 
-            // Inventory lookup
-            Single<WebClient> inventoryDiscoveryRequest = HttpEndpoint.rxGetWebClient(discovery,
-                    rec -> rec.getName().equals("inventory"))
-                    .onErrorReturn(t -> WebClient.create(vertx, new WebClientOptions()
+        inventory = WebClient.create(vertx, new WebClientOptions()
                             .setDefaultHost(System.getProperty("inventory.api.host", "localhost"))
-                            .setDefaultPort(Integer.getInteger("inventory.api.port", 9001))));
+                            .setDefaultPort(Integer.getInteger("inventory.api.port", 9001))
+                            );
 
-            // Zip all 3 requests
-            Single.zip(catalogDiscoveryRequest, inventoryDiscoveryRequest, (c, i) -> {
-                // When everything is done
-                catalog = c;
-                inventory = i;
-                return vertx.createHttpServer()
-                    .requestHandler(router::accept)
-                    .listen(Integer.getInteger("http.port", 8080));
-            }).subscribe();
-        });
+        vertx.createHttpServer().requestHandler(router::accept)
+              .listen(Integer.getInteger("http.port", 8080));
     }
 
     private void products(RoutingContext rc) {

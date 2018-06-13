@@ -135,10 +135,6 @@
                   <name>app</name>
                   <value>gateway</value>
                 </property>
-                <property>
-                  <name>version</name>
-                  <value>v1</value>
-                </property>
               </all>
             </labels>
             <annotations>
@@ -149,6 +145,9 @@
                 </property>
               </deployment>
             </annotations>
+            <env>
+              <JAVA_OPTIONS>-Dcatalog.api.host=catalog -Dcatalog.api.port=8080 -Dinventory.api.host=inventory -Dinventory.api.port=8080</JAVA_OPTIONS>
+            </env>
           </resources>
           <enricher>
             <excludes>
